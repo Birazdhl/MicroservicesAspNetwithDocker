@@ -1,0 +1,143 @@
+# =========================
+# Build folders
+# =========================
+bin/
+obj/
+out/
+publish/
+
+# =========================
+# Visual Studio
+# =========================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# =========================
+# Rider
+# =========================
+.idea/
+
+# =========================
+# VS Code
+# =========================
+.vscode/
+
+# =========================
+# NuGet
+# =========================
+*.nupkg
+packages/
+.nuget/
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+LogFiles/
+
+# =========================
+# ASP.NET Core
+# =========================
+appsettings.Development.json
+appsettings.Local.json
+
+# Secrets
+secrets.json
+
+# =========================
+# Entity Framework
+# =========================
+*.dbmdl
+*.jfm
+*.psess
+*.vsp
+*.vspx
+
+# =========================
+# IIS Express
+# =========================
+iisexpress/
+*.vspscc
+*.vssscc
+
+# =========================
+# Docker
+# =========================
+docker-compose.override.yml
+*.pid
+*.seed
+*.pid.lock
+
+# Docker volumes/temp
+**/docker-data/
+**/volumes/
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Test Results
+# =========================
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# =========================
+# Publish Profiles
+# =========================
+*.pubxml
+*.publishsettings
+
+# =========================
+# Resharper
+# =========================
+_ReSharper*/
+*.DotSettings.user
+
+# =========================
+# Azure
+# =========================
+.publish/
+
+# =========================
+# Node modules (if frontend exists)
+# =========================
+node_modules/
+
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
+*.tmp
+
+# =========================
+# Generated files
+# =========================
+Generated/
+wwwroot/lib/
+
+# =========================
+# SQL Server local DB
+# =========================
+*.mdf
+*.ldf
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+
+# =========================
+# JetBrains
+# =========================
+*.sln.iml

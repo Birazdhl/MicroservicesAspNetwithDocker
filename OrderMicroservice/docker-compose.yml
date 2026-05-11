@@ -12,6 +12,8 @@ services:
      - UsersMicroservicePort=9090
      - ProductsMicroserviceName=products-microservice
      - ProductsMicroservicePort=8080
+     - REDIS_HOST=redis
+     - REDIS_PORT=6379
     ports:
      - "7000:8080"
     networks:
@@ -72,6 +74,7 @@ services:
     - POSTGRES_DATABASE=eCommerceUsers
     - POSTGRES_USER=postgres
     - POSTGRES_PASSWORD=admin
+
    ports:
     - "5000:9090"
    networks:
@@ -93,6 +96,15 @@ services:
     - ./OrdersMicroservice.API/postgres-init:/docker-entrypoint-initdb.d
    networks:
     - users-postgres-network
+
+  redis:
+   image: redis:latest
+   ports:
+    - "6379:6379"
+   volumes:
+    - B:/Programming/Microservices/Self Practice/redis-cache:/data
+   networks:
+    - ecommerce-network
 
 
 networks:
