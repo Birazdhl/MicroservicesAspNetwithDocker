@@ -42,7 +42,7 @@ namespace BusinessLogicLayer.HttpsClient
                     return userFromCache;
                 }
 
-                HttpResponseMessage response = await _httpClient.GetAsync($"/api/users/{userID}");
+                HttpResponseMessage response = await _httpClient.GetAsync($"/gateway/users/{userID}");
 
                 if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
                 {

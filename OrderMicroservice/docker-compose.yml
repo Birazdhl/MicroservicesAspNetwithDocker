@@ -8,10 +8,10 @@ services:
      - MONGODB_HOST=mongodb-container
      - MONGODB_PORT=27017
      - MONGODB_DATABASE=OrdersDatabase
-     - UsersMicroserviceName=users-microservice
-     - UsersMicroservicePort=9090
-     - ProductsMicroserviceName=users-microservice
-     - ProductsMicroservicePort=9090
+     - UsersMicroserviceName=apigateway
+     - UsersMicroservicePort=8080
+     - ProductsMicroserviceName=apigateway
+     - ProductsMicroservicePort=8080
      - REDIS_HOST=redis
      - REDIS_PORT=6379
     ports:
@@ -103,6 +103,16 @@ services:
     - "6379:6379"
    volumes:
     - B:/Programming/Microservices/Self Practice/redis-cache:/data
+   networks:
+    - ecommerce-network
+
+  apigateway:
+   image: apigateway
+   build:
+    context: .
+    dockerfile: ApiGateway/Dockerfile
+   ports:
+    - "4000:8080"
    networks:
     - ecommerce-network
 
