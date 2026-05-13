@@ -1,10 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using FluentValidation;
-using eCommerce.OrdersMicroservice.BusinessLogicLayer.Validators;
+﻿using BusinessLogicLayer.RabbitMQ;
 using eCommerce.ordersMicroservice.BusinessLogicLayer.Mappers;
-using eCommerce.OrdersMicroservice.BusinessLogicLayer.ServiceContracts;
 using eCommerce.ordersMicroservice.BusinessLogicLayer.Services;
+using eCommerce.OrdersMicroservice.BusinessLogicLayer.ServiceContracts;
+using eCommerce.OrdersMicroservice.BusinessLogicLayer.Validators;
+using FluentValidation;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace eCommerce.OrdersMicroservice.BusinessLogicLayer;
@@ -19,6 +20,12 @@ public static class DependencyInjection
     services.AddAutoMapper(typeof(OrderAddRequestToOrderMappingProfile).Assembly);
 
     services.AddScoped<IOrdersService, OrdersService>();
+
+    services.AddTransient<IRabbitMQProductNameUpdateConsumer, RabbitMQProductNameUpdateConsumer>();
+    services.AddTransient<IRabbitMQProductDeletionConsumer, RabbitMQProductDeletionConsumer>();
+
+    services.AddHostedService<RabbitMQProductNameUpdateHostedService>();
+    services.AddHostedService<RabbitMQProductDeletionHostedService>();
 
     services.AddStackExchangeRedisCache(options =>
     {
