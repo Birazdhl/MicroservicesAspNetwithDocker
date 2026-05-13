@@ -152,21 +152,15 @@ public class ProductsService : IProductsService
     bool isProductNameChanged = productUpdateRequest.ProductName != existingProduct.ProductName;
     Product? updatedProduct = await _productsRepository.UpdateProduct(product);
 
-    //Publish product.update.name message to the exchange
-    if (isProductNameChanged)
+        //Publish product.update.name message to the exchange
+        //string routingKey = "product.update.name";
+    var headers = new Dictionary<string, object>()
     {
-      //string routingKey = "product.update.name";
-      var headers = new Dictionary<string, object>()
-      {
-        { "event", "product.update" },
-        { "field", "name" },
-        { "RowCount", 1 }
-      };
-      
-       var message = new ProductNameUpdateMessage(product.ProductID, product.ProductName);
+      { "event", "product.update" },
+      { "RowCount", 1 }
+    };
+        _rabbitMQPublisher.Publish<Product>(headers, product);
 
-        _rabbitMQPublisher.Publish<ProductNameUpdateMessage>(headers, message);
-    }
 
    ProductResponse? updatedProductResponse = _mapper.Map<ProductResponse>(updatedProduct);
 

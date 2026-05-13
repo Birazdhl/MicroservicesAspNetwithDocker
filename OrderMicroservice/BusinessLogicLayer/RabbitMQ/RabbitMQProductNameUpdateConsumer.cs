@@ -1,4 +1,5 @@
-﻿using Amazon.Runtime.Internal.Util;
+﻿using BusinessLogicLayer.DTO;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -15,8 +16,9 @@ namespace BusinessLogicLayer.RabbitMQ
         private readonly IModel _channel;
         private readonly IConnection _connection;
         private readonly ILogger<RabbitMQProductNameUpdateConsumer> _logger;
+        private readonly IDistributedCache _cache;
 
-        public RabbitMQProductNameUpdateConsumer(IConfiguration configuration, ILogger<RabbitMQProductNameUpdateConsumer> logger)
+        public RabbitMQProductNameUpdateConsumer(IConfiguration configuration, ILogger<RabbitMQProductNameUpdateConsumer> logger, IDistributedCache cache)
         {
             _configuration = configuration;
 
@@ -36,6 +38,7 @@ namespace BusinessLogicLayer.RabbitMQ
 
             _channel = _connection.CreateModel();
             _logger = logger;
+            _cache = cache;
         }
 
 
@@ -65,21 +68,37 @@ namespace BusinessLogicLayer.RabbitMQ
 
             EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
 
-            consumer.Received += (sender, args) =>
+            consumer.Received += async (sender, args) =>
             {
                 byte[] body = args.Body.ToArray();
                 string message = Encoding.UTF8.GetString(body);
 
                 if (message != null)
                 {
-                    ProductNameUpdateMessage? productNameUpdateMessage = JsonSerializer.Deserialize<ProductNameUpdateMessage>(message);
+                    ProductDTO? productDTO = JsonSerializer.Deserialize<ProductDTO>(message);
 
-                    if (productNameUpdateMessage != null)
+                    if (productDTO != null)
                     {
-                        _logger.LogInformation($"Product name updated: {productNameUpdateMessage.ProductID}, New name: {productNameUpdateMessage.NewName}");
+                        await HandleProductUpdation(productDTO);
                     }
                 }
             };
+
+            //consumer.Received += (sender, args) =>
+            //{
+            //    byte[] body = args.Body.ToArray();
+            //    string message = Encoding.UTF8.GetString(body);
+
+            //    if (message != null)
+            //    {
+            //        ProductNameUpdateMessage? productNameUpdateMessage = JsonSerializer.Deserialize<ProductNameUpdateMessage>(message);
+
+            //        if (productNameUpdateMessage != null)
+            //        {
+            //            _logger.LogInformation($"Product name updated: {productNameUpdateMessage.ProductID}, New name: {productNameUpdateMessage.NewName}");
+            //        }
+            //    }
+            //};
 
             _channel.BasicConsume(queue: queueName, consumer: consumer, autoAck: true);
         }
@@ -90,6 +109,19 @@ namespace BusinessLogicLayer.RabbitMQ
             _connection.Dispose();
         }
 
+        private async Task HandleProductUpdation(ProductDTO productDTO)
+        {
+            _logger.LogInformation($"Product name updated: {productDTO.ProductID}, New name: {productDTO.ProductName}");
+
+            string productJson = JsonSerializer.Serialize(productDTO);
+
+            DistributedCacheEntryOptions options = new DistributedCacheEntryOptions()
+              .SetAbsoluteExpiration(TimeSpan.FromSeconds(300));
+
+            string cacheKeyToWrite = $"product:{productDTO.ProductID}";
+
+            await _cache.SetStringAsync(cacheKeyToWrite, productJson, options);
+        }
 
 
         /// <summary>
