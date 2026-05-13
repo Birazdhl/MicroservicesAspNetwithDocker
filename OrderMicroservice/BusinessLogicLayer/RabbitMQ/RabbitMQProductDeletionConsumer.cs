@@ -40,22 +40,28 @@ namespace BusinessLogicLayer.RabbitMQ
         }
 
 
-        // For Topic Exchange
 
         public void Consume()
         {
-            string routingKey = "product.#";
+            //string routingKey = "product.#";
+            var headers = new Dictionary<string, object>()
+            {
+              { "x-match", "all" },
+              { "event", "product.delete" },
+              { "RowCount", 1 }
+            };
+
             string queueName = "orders.product.delete.queue";
 
             //Create exchange
             string exchangeName = _configuration["RabbitMQ_Products_Exchange"]!;
-            _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Topic, durable: true);
+            _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Headers, durable: true);
 
             //Create message queue
             _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null); //x-message-ttl | x-max-length | x-expired 
 
             //Bind the message to exchange
-            _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKey);
+            _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: string.Empty, arguments: headers);
 
 
             EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
@@ -84,6 +90,62 @@ namespace BusinessLogicLayer.RabbitMQ
             _channel.Dispose();
             _connection.Dispose();
         }
+
+
+
+
+
+
+
+
+
+
+
+
+        // For Topic Exchange
+
+        //public void Consume()
+        //{
+        //    string routingKey = "product.#";
+        //    string queueName = "orders.product.delete.queue";
+
+        //    //Create exchange
+        //    string exchangeName = _configuration["RabbitMQ_Products_Exchange"]!;
+        //    _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Topic, durable: true);
+
+        //    //Create message queue
+        //    _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null); //x-message-ttl | x-max-length | x-expired 
+
+        //    //Bind the message to exchange
+        //    _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKey);
+
+
+        //    EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
+
+        //    consumer.Received += (sender, args) =>
+        //    {
+        //        byte[] body = args.Body.ToArray();
+        //        string message = Encoding.UTF8.GetString(body);
+
+        //        if (message != null)
+        //        {
+        //            ProductDeletionMessage? productDeletionMessage = JsonSerializer.Deserialize<ProductDeletionMessage>(message);
+
+        //            if (productDeletionMessage != null)
+        //            {
+        //                _logger.LogInformation($"Product deleted: {productDeletionMessage.ProductID}, Product name: {productDeletionMessage.ProductName}");
+        //            }
+        //        }
+        //    };
+
+        //    _channel.BasicConsume(queue: queueName, consumer: consumer, autoAck: true);
+        //}
+
+        //public void Dispose()
+        //{
+        //    _channel.Dispose();
+        //    _connection.Dispose();
+        //}
 
 
 

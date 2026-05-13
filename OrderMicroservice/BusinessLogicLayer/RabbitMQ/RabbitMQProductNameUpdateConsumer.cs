@@ -39,25 +39,28 @@ namespace BusinessLogicLayer.RabbitMQ
         }
 
 
-
-
-        /// <summary>
-        /// Consumer for Topic Exchange
-        /// </summary>
         public void Consume()
         {
-            string routingKey = "product.update.*";
+            //string routingKey = "product.update.*";
+            var headers = new Dictionary<string, object>()
+            {
+              { "x-match", "all" },
+              { "event", "product.update" },
+              { "field", "name" },
+              { "RowCount", 1 }
+            };
+
             string queueName = "orders.product.update.name.queue";
 
             //Create exchange
             string exchangeName = _configuration["RabbitMQ_Products_Exchange"]!;
-            _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Topic, durable: true);
+            _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Headers, durable: true);
 
             //Create message queue
             _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null); //x-message-ttl | x-max-length | x-expired 
 
             //Bind the message to exchange
-            _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKey);
+            _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: string.Empty, arguments: headers);
 
 
             EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
@@ -86,6 +89,54 @@ namespace BusinessLogicLayer.RabbitMQ
             _channel.Dispose();
             _connection.Dispose();
         }
+
+
+
+        /// <summary>
+        /// Consumer for Topic Exchange
+        /// </summary>
+        //public void Consume()
+        //{
+        //    string routingKey = "product.update.*";
+        //    string queueName = "orders.product.update.name.queue";
+
+        //    //Create exchange
+        //    string exchangeName = _configuration["RabbitMQ_Products_Exchange"]!;
+        //    _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Topic, durable: true);
+
+        //    //Create message queue
+        //    _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null); //x-message-ttl | x-max-length | x-expired 
+
+        //    //Bind the message to exchange
+        //    _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKey);
+
+
+        //    EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
+
+        //    consumer.Received += (sender, args) =>
+        //    {
+        //        byte[] body = args.Body.ToArray();
+        //        string message = Encoding.UTF8.GetString(body);
+
+        //        if (message != null)
+        //        {
+        //            ProductNameUpdateMessage? productNameUpdateMessage = JsonSerializer.Deserialize<ProductNameUpdateMessage>(message);
+
+        //            if (productNameUpdateMessage != null)
+        //            {
+        //                _logger.LogInformation($"Product name updated: {productNameUpdateMessage.ProductID}, New name: {productNameUpdateMessage.NewName}");
+        //            }
+        //        }
+        //    };
+
+        //    _channel.BasicConsume(queue: queueName, consumer: consumer, autoAck: true);
+        //}
+
+        //public void Dispose()
+        //{
+        //    _channel.Dispose();
+        //    _connection.Dispose();
+        //}
 
 
 

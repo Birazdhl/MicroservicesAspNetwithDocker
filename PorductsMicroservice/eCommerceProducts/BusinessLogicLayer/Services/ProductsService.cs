@@ -78,9 +78,14 @@ public class ProductsService : IProductsService
     if (isDeleted)
     {
         ProductDeletionMessage message = new ProductDeletionMessage(existingProduct.ProductID, existingProduct.ProductName);
-        string routingKey = "product.delete";
+        //string routingKey = "product.delete"
+        var headers = new Dictionary<string, object>()
+        {
+          { "event", "product.delete" },
+          { "RowCount", 1 }
+        };
 
-        _rabbitMQPublisher.Publish(routingKey, message);
+        _rabbitMQPublisher.Publish(headers, message);
     }
 
     return isDeleted;
@@ -150,10 +155,17 @@ public class ProductsService : IProductsService
     //Publish product.update.name message to the exchange
     if (isProductNameChanged)
     {
-        string routingKey = "product.update.name";
-        var message = new ProductNameUpdateMessage(product.ProductID, product.ProductName);
+      //string routingKey = "product.update.name";
+      var headers = new Dictionary<string, object>()
+      {
+        { "event", "product.update" },
+        { "field", "name" },
+        { "RowCount", 1 }
+      };
+      
+       var message = new ProductNameUpdateMessage(product.ProductID, product.ProductName);
 
-        _rabbitMQPublisher.Publish<ProductNameUpdateMessage>(routingKey, message);
+        _rabbitMQPublisher.Publish<ProductNameUpdateMessage>(headers, message);
     }
 
    ProductResponse? updatedProductResponse = _mapper.Map<ProductResponse>(updatedProduct);
